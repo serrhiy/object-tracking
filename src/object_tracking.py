@@ -92,6 +92,9 @@ def cam_shift(capture: cv2.VideoCapture):
 
 
 def csrt_tracking(capture: cv2.VideoCapture):
+    fps = capture.get(cv2.CAP_PROP_FPS)
+    delay = int(1000 / fps) if fps > 0 else 30
+
     tracker = cv2.legacy.TrackerCSRT_create()
 
     ret, frame = capture.read()
@@ -127,7 +130,7 @@ def csrt_tracking(capture: cv2.VideoCapture):
             )
 
         cv2.imshow("CSRT Tracking", frame)
-        k = cv2.waitKey(1) & 0xFF
+        k = cv2.waitKey(delay) & 0xFF
         if k == 27:
             break
 
