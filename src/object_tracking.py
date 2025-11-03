@@ -91,9 +91,53 @@ def cam_shift(capture: cv2.VideoCapture):
     cv2.destroyAllWindows()
 
 
+def csrt_tracking(capture: cv2.VideoCapture):
+    tracker = cv2.legacy.TrackerCSRT_create()
+
+    ret, frame = capture.read()
+    if not ret:
+        print("Cannot read video stream")
+        return
+
+    bbox = cv2.selectROI("Select ROI", frame, False)
+    tracker.init(frame, bbox)
+
+    while True:
+        ret, frame = capture.read()
+        if not ret:
+            break
+
+        success, box = tracker.update(frame)
+
+        if success:
+            (x, y, w, h) = [int(v) for v in box]
+            cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+            cv2.putText(
+                frame,
+                "Tracking",
+                (10, 30),
+                cv2.FONT_HERSHEY_SIMPLEX,
+                0.7,
+                (0, 255, 0),
+                2,
+            )
+        else:
+            cv2.putText(
+                frame, "Lost", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2
+            )
+
+        cv2.imshow("CSRT Tracking", frame)
+        k = cv2.waitKey(1) & 0xFF
+        if k == 27:
+            break
+
+    capture.release()
+    cv2.destroyAllWindows()
+
+
 if __name__ == "__main__":
     cap = cv2.VideoCapture(VIDEO_PATH)
     if not cap.isOpened():
         print("Cannot open camera")
         exit()
-    cam_shift(cap)
+    csrt_tracking(cap)
